@@ -5,6 +5,8 @@ import time
 import threading
 from pymongo import MongoClient
 import random
+from keep_alive import keep_alive
+
 
 USER_AGENT = os.environ['user_agent']
 CLIENT_ID = os.environ['client_id']
@@ -27,6 +29,7 @@ subreddit = reddit.subreddit(SUBREDDIT)
 comments = subreddit.stream.comments(skip_existing=True)
 
 trigger = "!vellabot"
+keep_alive()
 month = [
   "january", "february", "march", "april", "may", "june", "july", "august", 
   "september", "october", "november", "december"
