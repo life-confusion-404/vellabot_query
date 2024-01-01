@@ -130,10 +130,7 @@ def query():
       current_month=0
       for i in range(0, 12):
         data = db[month[i]].find_one()
-        flag = 0
-        for entry in data:
-          flag = 1
-        if flag == 0:
+        if data is None:
           break
         current_month = i
       count = 0
