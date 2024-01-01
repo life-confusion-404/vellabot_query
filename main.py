@@ -136,9 +136,7 @@ def query():
       count = 0
       for i in range(0, current_month-2):
         data = db[month[i]].find()
-        flag = 0
         for entry in data:
-          flag = 1
           if entry['user'].lower() in user:
             count += entry['comments']
       if current_month-3>=0:
@@ -148,9 +146,7 @@ def query():
           continue
         data = db[month[i]].find()
         count = 0
-        flag = 0
         for entry in data:
-          flag = 1
           if entry['user'].lower() in user:
             count += entry['comments']
         total_comments = count
