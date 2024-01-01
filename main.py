@@ -57,7 +57,7 @@ query_month = [i[:3] for i in month]
 
 
 def clearData():
-  db = MClient["2023"]
+  db = MClient["2024"]
   db["limit"].delete_many({})
 
 
@@ -69,7 +69,7 @@ def reset():
 
 
 def query():
-  db = MClient["2023"]
+  db = MClient["2024"]
   for comment in comments:
     post = reddit.submission(id=comment.submission).title
     if comment.body.lower(
