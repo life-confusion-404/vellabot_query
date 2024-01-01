@@ -129,7 +129,7 @@ def query():
       total_comments = 0
       current_month=0
       for i in range(0, 12):
-        data = db[month[i]].find()
+        data = db[month[i]].find_one()
         flag = 0
         for entry in data:
           flag = 1
@@ -147,6 +147,8 @@ def query():
       if current_month-3>=0:
         reply += 'Till '+month[current_month-3].capitalize()[:3] + '|' + str(count) + '\n'
       for i in range(current_month-2, current_month+1):
+        if i < 0:
+          continue
         data = db[month[i]].find()
         count = 0
         flag = 0
