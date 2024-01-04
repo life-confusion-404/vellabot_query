@@ -70,104 +70,107 @@ def reset():
 
 def query():
   db = MClient["2024"]
-  for comment in comments:
-    post = reddit.submission(id=comment.submission).title
-    if comment.body.lower(
-    ).find(trigger) != -1:
-      text = comment.body
-      text = text[comment.body.lower().find(trigger):]
-      text = text.split(' ')
-      query_count = 1
+  while True:
+    try:
+      for comment in comments:
+        post = reddit.submission(id=comment.submission).title
+        if comment.body.lower(
+        ).find(trigger) != -1:
+          text = comment.body
+          text = text[comment.body.lower().find(trigger):]
+          text = text.split(' ')
+          query_count = 1
 
-      ### Rate Limit
-      request_user = str(comment.author)
-      if db["limit"].count_documents({'user': request_user}) > 0:
-        data = db["limit"].find_one({"user": request_user})
-        query_count = data['count'] + 1
-        db["limit"].delete_one({'user': request_user})
-      db["limit"].insert_one({'user': request_user, 'count': query_count})
-      if query_count > 15:
-        continue
-      ### Rate Limit
+          ### Rate Limit
+          request_user = str(comment.author)
+          if db["limit"].count_documents({'user': request_user}) > 0:
+            data = db["limit"].find_one({"user": request_user})
+            query_count = data['count'] + 1
+            db["limit"].delete_one({'user': request_user})
+          db["limit"].insert_one({'user': request_user, 'count': query_count})
+          if query_count > 15:
+            continue
+          ### Rate Limit
 
-      total_days = 1
+          total_days = 1
 
-      words = post.split(' ')
-      for word in words:
-        try:
-          total_days = int(word)
-          break
-        except:
-          continue
-      if len(text) > 1 and (text[1].lower() in query_month):
-        reply = 'Top 5 Vellas in '+ text[1] +': \n\n'
-        reply += 'User|Comments Count\n:-:|:-:\n'
-        for m in month:
-          if text[1][:3].lower() == m[:3]:
-            data = db[m].find().sort("comments", -1).limit(5)
-            for i in data:
-              reply += i['user'] + '|' + str(i['comments']) + '\n'
-        try:
-          reply += '\n\n[^(How to use.)](https://www.reddit.com/r/vellabot/comments/10fd998/launching_lnrdt_vellabot)'
-          comment.reply(reply)
-          continue
-        except:
-          continue
-      reply = 'Month|Comments Count\n:-:|:-:\n'
-      user = [str(comment.author).lower()]
-      if len(text) > 1:
-        user = text[1]
-        user = user.lower()
-        user = user.split('+')
-        if 'vellabot' in user:
-          reply = random.choices(memes, k=1)
+          words = post.split(' ')
+          for word in words:
+            try:
+              total_days = int(word)
+              break
+            except:
+              continue
+          if len(text) > 1 and (text[1].lower() in query_month):
+            reply = 'Top 5 Vellas in '+ text[1] +': \n\n'
+            reply += 'User|Comments Count\n:-:|:-:\n'
+            for m in month:
+              if text[1][:3].lower() == m[:3]:
+                data = db[m].find().sort("comments", -1).limit(5)
+                for i in data:
+                  reply += i['user'] + '|' + str(i['comments']) + '\n'
+            try:
+              reply += '\n\n[^(How to use.)](https://www.reddit.com/r/vellabot/comments/10fd998/launching_lnrdt_vellabot)'
+              comment.reply(reply)
+              continue
+            except:
+              continue
+          reply = 'Month|Comments Count\n:-:|:-:\n'
+          user = [str(comment.author).lower()]
+          if len(text) > 1:
+            user = text[1]
+            user = user.lower()
+            user = user.split('+')
+            if 'vellabot' in user:
+              reply = random.choices(memes, k=1)
+              try:
+                comment.reply(reply)
+              except:
+                continue
+              continue
+          total_comments = 0
+          current_month=0
+          for i in range(0, 12):
+            data = db[month[i]].find_one()
+            if data is None:
+              break
+            current_month = i
+          count = 0
+          for i in range(0, current_month-2):
+            data = db[month[i]].find()
+            for entry in data:
+              if entry['user'].lower() in user:
+                count += entry['comments']
+          if current_month-3>=0:
+            reply += 'Till '+month[current_month-3].capitalize()[:3] + '|' + str(count) + '\n'
+          for i in range(current_month-2, current_month+1):
+            if i < 0:
+              continue
+            data = db[month[i]].find()
+            count = 0
+            for entry in data:
+              if entry['user'].lower() in user:
+                count += entry['comments']
+            total_comments = count
+            reply += month[i].capitalize()[:3] + '|' + str(count) + '\n'
+
+          average = total_comments // total_days
+          verdict = 'Lmao ded'
+          for range_, result in verdicts.items():
+            lower, upper = range_
+            if lower <= average <= upper:
+                verdict = result
+                break
+          reply += '\nAvg no of Comments/Day made by ' + user[
+            0] + ' in this month: ' + str(average) + '\n\n\
+                Verdict: ' + verdict
           try:
+            reply += '\n\n[^(How to use.)](https://www.reddit.com/r/vellabot/comments/10fd998/launching_lnrdt_vellabot)'
             comment.reply(reply)
           except:
             continue
-          continue
-      total_comments = 0
-      current_month=0
-      for i in range(0, 12):
-        data = db[month[i]].find_one()
-        if data is None:
-          break
-        current_month = i
-      count = 0
-      for i in range(0, current_month-2):
-        data = db[month[i]].find()
-        for entry in data:
-          if entry['user'].lower() in user:
-            count += entry['comments']
-      if current_month-3>=0:
-        reply += 'Till '+month[current_month-3].capitalize()[:3] + '|' + str(count) + '\n'
-      for i in range(current_month-2, current_month+1):
-        if i < 0:
-          continue
-        data = db[month[i]].find()
-        count = 0
-        for entry in data:
-          if entry['user'].lower() in user:
-            count += entry['comments']
-        total_comments = count
-        reply += month[i].capitalize()[:3] + '|' + str(count) + '\n'
-
-      average = total_comments // total_days
-      verdict = 'Lmao ded'
-      for range_, result in verdicts.items():
-         lower, upper = range_
-         if lower <= average <= upper:
-            verdict = result
-            break
-      reply += '\nAvg no of Comments/Day made by ' + user[
-        0] + ' in this month: ' + str(average) + '\n\n\
-            Verdict: ' + verdict
-      try:
-        reply += '\n\n[^(How to use.)](https://www.reddit.com/r/vellabot/comments/10fd998/launching_lnrdt_vellabot)'
-        comment.reply(reply)
-      except:
-        continue
-
+    except:
+      continue
 
 def delete():
   unread_replies = reddit.inbox.stream()
