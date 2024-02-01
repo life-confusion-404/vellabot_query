@@ -195,45 +195,45 @@ def query():
     except:
       continue
 
-def delete():
-  unread_replies = reddit.inbox.stream()
-  for unread_reply in unread_replies:
-    try:
-      unread_reply.mark_read()
-    except:
-      continue
+# def delete():
+#   unread_replies = reddit.inbox.stream()
+#   for unread_reply in unread_replies:
+#     try:
+#       unread_reply.mark_read()
+#     except:
+#       continue
 
-    if 'delete' in unread_reply.body.lower():
-      try:
-        deleting_user = unread_reply.author
-        bot_comment = reddit.comment(unread_reply.parent_id.split('_')[-1])
-        parent_comment = reddit.comment(
-          bot_comment.parent_id.split('_')[-1]).author
-        if parent_comment == deleting_user:
-          comment = bot_comment
-          comment.delete()
-      except:
-        continue
-    elif '!optout' in unread_reply.body.lower():
-      try:
-        user = unread_reply.author
-        db = MClient["2024"]
-        db["ignore"].insert_one({'_id': str(user)})
-        reply = 'You have unsubscribed from vellabot, your name will no longer show up in any of my replies.\n\n'
-        reply += "".join(random.choices(optoutReplies, k=1))
-        unread_reply.reply(reply)
-      except:
-        continue
-    elif '!optin' in unread_reply.body.lower():
-      try:
-        user = unread_reply.author
-        db = MClient["2024"]
-        db["ignore"].delete_one({'_id': str(user)})
-        reply = 'You have subscribed back to vellabot, your name _might_ show up in _some_ of my replies.\n\n'
-        reply += "".join(random.choices(optinReplies, k=1))
-        unread_reply.reply(reply)
-      except:
-        continue
+#     if 'delete' in unread_reply.body.lower():
+#       try:
+#         deleting_user = unread_reply.author
+#         bot_comment = reddit.comment(unread_reply.parent_id.split('_')[-1])
+#         parent_comment = reddit.comment(
+#           bot_comment.parent_id.split('_')[-1]).author
+#         if parent_comment == deleting_user:
+#           comment = bot_comment
+#           comment.delete()
+#       except:
+#         continue
+#     elif '!optout' in unread_reply.body.lower():
+#       try:
+#         user = unread_reply.author
+#         db = MClient["2024"]
+#         db["ignore"].insert_one({'_id': str(user)})
+#         reply = 'You have unsubscribed from vellabot, your name will no longer show up in any of my replies.\n\n'
+#         reply += "".join(random.choices(optoutReplies, k=1))
+#         unread_reply.reply(reply)
+#       except:
+#         continue
+#     elif '!optin' in unread_reply.body.lower():
+#       try:
+#         user = unread_reply.author
+#         db = MClient["2024"]
+#         db["ignore"].delete_one({'_id': str(user)})
+#         reply = 'You have subscribed back to vellabot, your name _might_ show up in _some_ of my replies.\n\n'
+#         reply += "".join(random.choices(optinReplies, k=1))
+#         unread_reply.reply(reply)
+#       except:
+#         continue
 
 process1 = threading.Thread(target=query)
 process2 = threading.Thread(target=delete)
