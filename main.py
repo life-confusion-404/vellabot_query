@@ -237,7 +237,7 @@ def delete():
 
 process1 = threading.Thread(target=query)
 process2 = threading.Thread(target=delete)
-process3 = threading.Thread(target=reset)
+#process3 = threading.Thread(target=reset)
 process1.start()
 process2.start()
 #process3.start()
